@@ -54,7 +54,7 @@ export default function BudgetCalendar() {
             <div
               key={day}
               onClick={() => handleAddEntry(day)}
-              className="border p-1 rounded hover:bg-gray-100 cursor-pointer"
+              className={`border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${new Date(currentYear, currentMonth, day).getDay() === 5 ? "bg-payday/20 dark:bg-payday/30" : ""}`}
               title="Kliknij aby dodać wpis"
             >
               <div className="font-semibold">{day}</div>
