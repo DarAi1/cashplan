@@ -1,0 +1,1 @@
+export default function BudgetCalendar() { return <div>CashPlan Calendar Placeholder</div>; }
