@@ -90,6 +90,48 @@ export default function SnakeGame({ onExit }) {
     return () => clearInterval(interval);
   }, [running, food, gameOver, cols, rows]);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        ctx.fillStyle = themeStyles.backgroundGrid(x, y);
+        ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
+      }
+    }
+
+    ctx.strokeStyle = themeStyles.border;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, HUD_HEIGHT + 2, cols * cellSize - 4, rows * cellSize - 4);
+
+    snake.forEach(([x, y], i) => {
+      ctx.fillStyle = i === 0 ? themeStyles.head : themeStyles.body(i);
+      ctx.shadowColor = "rgba(0, 255, 0, 0.6)";
+      ctx.shadowBlur = i === 0 ? 12 : 6;
+      ctx.beginPath();
+      ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#ff5050";
+    ctx.shadowColor = "rgba(255, 0, 0, 0.8)";
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(
+      food[0] * cellSize + cellSize / 2,
+      food[1] * cellSize + HUD_HEIGHT + cellSize / 2,
+      6,
+      0,
+      2 * Math.PI
+    );
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }, [snake, food, canvasSize, theme]);
+
   const handleTouchStart = (e) => {
     const touch = e.touches[0];
     setTouchStart({ x: touch.clientX, y: touch.clientY });
