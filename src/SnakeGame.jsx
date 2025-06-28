@@ -70,6 +70,55 @@ export default function SnakeGame({ onExit }) {
   }, []);
 
   useEffect(() => {
+    if (!running || gameOver) return;
+
+    const interval = setInterval(() => {
+      setSnake((prev) => {
+        const newHead = [prev[0][0] + dir[0], prev[0][1] + dir[1]];
+        const newSnake = [newHead, ...prev];
+
+        const hitWall =
+          newHead[0] < 0 || newHead[1] < 0 ||
+          newHead[0] >= cols || newHead[1] >= rows;
+
+        const hitSelf = prev.some(
+          ([x, y]) => x === newHead[0] && y === newHead[1]
+        );
+
+        if (hitWall || hitSelf) {
+          playSound(thudSound);
+          setGameOver(true);
+
+          const newEntry = { name: playerName || "Anon", score };
+          const updatedScores = [...highScores, newEntry]
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10);
+          setHighScores(updatedScores);
+          localStorage.setItem("snake-highscores", JSON.stringify(updatedScores));
+
+          setRunning(false);
+          return prev;
+        }
+
+        const foundFood = newHead[0] === food[0] && newHead[1] === food[1];
+        if (foundFood) {
+          playSound(popSound);
+          setScore((s) => s + 1);
+          setFood([
+            Math.floor(Math.random() * cols),
+            Math.floor(Math.random() * rows),
+          ]);
+          return newSnake;
+        } else {
+          return newSnake.slice(0, -1);
+        }
+      });
+    }, 150);
+
+    return () => clearInterval(interval);
+  }, [dir, running, food, gameOver]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -83,7 +132,7 @@ export default function SnakeGame({ onExit }) {
     }
 
     ctx.strokeStyle = themeStyles.border;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 4;
     ctx.strokeRect(0, HUD_HEIGHT, cols * cellSize, rows * cellSize);
 
     snake.forEach(([x, y], i) => {
@@ -127,6 +176,15 @@ export default function SnakeGame({ onExit }) {
     playSound(clickSound);
     setTheme(newTheme);
   };
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-black z-50">
