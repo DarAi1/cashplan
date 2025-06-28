@@ -33,7 +33,7 @@ export default function BudgetCalendar() {
     const value = parseFloat(amount);
     if (isNaN(value)) return;
 
-    const key = ${currentYear}-${currentMonth}-${modalDay};
+    const key = currentYear + "-" + currentMonth + "-" + modalDay;
     const newEntry = { type: entryType, amount: value };
     const existing = entries[key] || [];
     setEntries({ ...entries, [key]: [...existing, newEntry] });
