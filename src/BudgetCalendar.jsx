@@ -81,9 +81,9 @@ export default function BudgetCalendar() {
         backgroundRepeat: "no-repeat"
       }}
     >
-      <div className="relative mb-4 rounded-xl backdrop-blur-md bg-white/30 dark:bg-white/10 border border-white/10 dark:border-white/5 shadow-md px-4 py-2 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center">
+      <div className="relative mb-4 rounded-xl backdrop-blur-md bg-white/30 dark:bg-white/10 border border-white/10 dark:border-white/5 shadow-md px-4 py-2 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center animate-fade-in">
         <div className="absolute left-4 top-1/2 -translate-y-1/2">
-          <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm">
+          <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm active:scale-95 transition-transform">
             ←
           </button>
         </div>
@@ -91,13 +91,13 @@ export default function BudgetCalendar() {
         <div className="text-center">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">CashPlan</h1>
           <div className="text-sm text-gray-800 dark:text-gray-300">{monthName} {currentYear}</div>
-          <button onClick={handleResetToday} className="mt-1 text-sm px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm">
+          <button onClick={handleResetToday} className="mt-1 text-sm px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm active:scale-95 transition-transform">
             Today
           </button>
         </div>
 
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
-          <button onClick={handleNextMonth} className="text-lg px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm">
+          <button onClick={handleNextMonth} className="text-lg px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm active:scale-95 transition-transform">
             →
           </button>
         </div>
@@ -111,7 +111,7 @@ export default function BudgetCalendar() {
 
       <div className="grid grid-cols-7 gap-1 text-xs sm:text-sm">
         {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
-        {days.map((day) => {
+        {days.map((day, index) => {
           const key = currentYear + "-" + currentMonth + "-" + day;
           const daily = entries[key] || [];
           const total = daily.reduce(
@@ -124,7 +124,8 @@ export default function BudgetCalendar() {
             <div
               key={day}
               onClick={() => openModal(day)}
-              className={`border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${isFriday ? "bg-yellow-100 dark:bg-yellow-800" : ""}`}
+              style={{ animationDelay: `${index * 15}ms` }}
+              className={`border ${isFriday ? "border-2 border-yellow-400 dark:border-yellow-600" : "border border-white/30 dark:border-white/10"} p-1 rounded cursor-pointer hover:bg-white/20 dark:hover:bg-white/10 backdrop-blur-md transition-all animate-fade-in-up`}
               title="Click to add entry"
             >
               <div className="font-semibold text-sm sm:text-base">{day}</div>
