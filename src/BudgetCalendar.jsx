@@ -73,16 +73,26 @@ export default function BudgetCalendar() {
 
   return (
     <div className="p-2 sm:p-4 text-gray-900 dark:text-gray-50 bg-white dark:bg-black min-h-screen transition-colors">
-      <div className="relative flex justify-between items-center mb-4">
-        <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">←</button>
-        <div className="text-center flex-1">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">CashPlan</h1>
-          <div className="text-sm sm:text-base text-gray-700 dark:text-gray-300">{monthName} {currentYear}</div>
-          <button onClick={handleResetToday} className="mt-1 px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm">
+      <div className="relative mb-4 rounded-xl backdrop-blur-md bg-white/30 dark:bg-white/10 border border-white/10 dark:border-white/5 shadow-md px-4 py-2 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2">
+          <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm">
+            ←
+          </button>
+        </div>
+
+        <div className="text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">CashPlan</h1>
+          <div className="text-sm text-gray-800 dark:text-gray-300">{monthName} {currentYear}</div>
+          <button onClick={handleResetToday} className="mt-1 text-sm px-3 py-1 bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 rounded shadow-sm">
             Today
           </button>
         </div>
-        <button onClick={handleNextMonth} className="text-lg px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">→</button>
+
+        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+          <button onClick={handleNextMonth} className="text-lg px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm">
+            →
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-7 gap-1 text-center font-medium mb-2 text-xs sm:text-sm">
@@ -128,7 +138,7 @@ export default function BudgetCalendar() {
 
       {modalDay && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg w-11/12 max-w-sm animate-fade-in">
+          <div className="backdrop-blur-md bg-white/30 dark:bg-white/10 border border-white/20 dark:border-white/10 shadow-xl rounded-2xl p-4 w-11/12 max-w-sm animate-fade-in">
             <h2 className="text-lg font-bold mb-3 text-gray-800 dark:text-gray-100">
               Add entry – {modalDay}.{currentMonth + 1}.{currentYear}
             </h2>
