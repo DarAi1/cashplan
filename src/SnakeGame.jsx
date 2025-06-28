@@ -75,8 +75,24 @@ export default function SnakeGame({ onExit }) {
     ctx.lineWidth = 2;
     ctx.strokeRect(0, HUD_HEIGHT, cols * cellSize, rows * cellSize);
 
-    ctx.fillStyle = "lime";
-    snake.forEach(([x, y]) => ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize));
+    // Draw snake with style
+    snake.forEach(([x, y], i) => {
+      ctx.fillStyle = i === 0 ? "#7CFC00" : "#32CD32";
+      ctx.shadowColor = "rgba(0, 255, 0, 0.5)";
+      ctx.shadowBlur = 4;
+      ctx.beginPath();
+      ctx.roundRect(
+        x * cellSize,
+        y * cellSize + HUD_HEIGHT,
+        cellSize,
+        cellSize,
+        4
+      );
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+
+    // Draw food
     ctx.fillStyle = "red";
     ctx.fillRect(food[0] * cellSize, food[1] * cellSize + HUD_HEIGHT, cellSize, cellSize);
   }, [snake, food, canvasSize]);
