@@ -154,6 +154,7 @@ export default function SnakeGame({ onExit }) {
     };
 
     const handleTouchMove = (e) => {
+      e.preventDefault();
       if (!touchStart) return;
       const touch = e.touches[0];
       const dx = touch.clientX - touchStart.x;
@@ -169,8 +170,8 @@ export default function SnakeGame({ onExit }) {
       setTouchStart(null);
     };
 
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
       window.removeEventListener("touchstart", handleTouchStart);
