@@ -14,6 +14,7 @@ export default function SnakeGame({ onExit }) {
         case "ArrowDown": setDir([0, 1]); break;
         case "ArrowLeft": setDir([-1, 0]); break;
         case "ArrowRight": setDir([1, 0]); break;
+        default: break;
       }
     };
     window.addEventListener("keydown", handleKey);
@@ -22,6 +23,7 @@ export default function SnakeGame({ onExit }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "lime";
