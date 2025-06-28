@@ -8,6 +8,7 @@ export default function BudgetCalendar() {
   const [modalDay, setModalDay] = useState(null);
   const [entryType, setEntryType] = useState("income");
   const [amount, setAmount] = useState("");
+  const [showSnake, setShowSnake] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("budget-entries");
@@ -81,6 +82,20 @@ export default function BudgetCalendar() {
         backgroundRepeat: "no-repeat"
       }}
     >
+      {showSnake ? (
+        <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+          <div className="text-white text-center">
+            <p className="mb-4">Snake Game (placeholder)</p>
+            <button
+              onClick={() => setShowSnake(false)}
+              className="px-4 py-2 rounded bg-red-600 text-white"
+            >
+              Exit
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="relative mb-4 rounded-xl backdrop-blur-md bg-white/30 border border-white/10 shadow-md px-4 py-2 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center animate-fade-in">
         <div className="absolute left-4 top-1/2 -translate-y-1/2">
           <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-white/30 hover:bg-white/40 shadow-sm active:scale-95 transition-transform">
@@ -143,6 +158,15 @@ export default function BudgetCalendar() {
             </div>
           );
         })}
+      </div>
+
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2">
+        <button
+          onClick={() => setShowSnake(true)}
+          className="px-4 py-2 rounded-full bg-black/70 text-white shadow-lg backdrop-blur-md"
+        >
+          Relax 🎮
+        </button>
       </div>
 
       {modalDay && (
