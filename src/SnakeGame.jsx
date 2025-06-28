@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+
 export default function SnakeGame({ onExit }) {
   const canvasRef = useRef(null);
   const [snake, setSnake] = useState([[10, 10]]);
