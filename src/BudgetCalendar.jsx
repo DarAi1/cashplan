@@ -104,12 +104,18 @@ export default function BudgetCalendar() {
             <button onClick={handleNextMonth} className="text-xl">→</button>
           </div>
 
-          <div className="flex justify-center mb-3">
+          <div className="flex justify-center gap-4 mb-3">
             <button
               onClick={handleResetToday}
               className="px-4 py-2 rounded-lg bg-white/40 backdrop-blur text-black font-semibold shadow"
             >
               Today
+            </button>
+            <button
+              onClick={() => setShowSnake(true)}
+              className="px-4 py-2 rounded-lg bg-white/40 backdrop-blur text-black font-semibold shadow"
+            >
+              Relax Mode
             </button>
           </div>
 
@@ -149,15 +155,6 @@ export default function BudgetCalendar() {
                 </div>
               );
             })}
-          </div>
-
-          <div className="fixed bottom-4 left-0 right-0 flex justify-center">
-            <button
-              onClick={() => setShowSnake(true)}
-              className="px-6 py-2 rounded-full bg-white/40 backdrop-blur-md text-black font-semibold shadow-md"
-            >
-              Relax Mode
-            </button>
           </div>
         </div>
       )}
