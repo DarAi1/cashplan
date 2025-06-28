@@ -158,8 +158,12 @@ export default function SnakeGame({ onExit }) {
       if (dy > 30 && dir[1] !== -1) newDir = [0, 1];
       else if (dy < -30 && dir[1] !== 1) newDir = [0, -1];
     }
-    setDir(newDir);
+
     dirRef.current = newDir;
+    setDir(newDir);
+  };
+
+  const handleTouchEnd = () => {
     setTouchStart(null);
   };
 
@@ -168,6 +172,7 @@ export default function SnakeGame({ onExit }) {
       className="fixed inset-0 bg-black z-50"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <canvas
         ref={canvasRef}
