@@ -19,6 +19,7 @@ export default function SnakeGame({ onExit }) {
   const HUD_HEIGHT = 120;
   const cols = Math.floor(canvasSize.width / cellSize);
   const rows = Math.floor((canvasSize.height - HUD_HEIGHT) / cellSize);
+  const pulse = Math.sin(Date.now() / 200) * 2 + 4;
 
   useEffect(() => {
     const updateCanvasSize = () => {
@@ -70,49 +71,48 @@ export default function SnakeGame({ onExit }) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw glassy grid background
+    // Background grid
     for (let x = 0; x < cols; x++) {
       for (let y = 0; y < rows; y++) {
-        ctx.fillStyle = (x + y) % 2 === 0 ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)";
+        ctx.fillStyle = (x + y) % 2 === 0 ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
         ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
       }
     }
 
-    // Draw border
-    ctx.strokeStyle = "#00BFFF";
-    ctx.lineWidth = 2;
+    // Border
+    ctx.strokeStyle = `hsl(${(Date.now() / 10) % 360}, 100%, 60%)`;
+    ctx.lineWidth = 3;
     ctx.strokeRect(0, HUD_HEIGHT, cols * cellSize, rows * cellSize);
 
-    // Draw snake with animation
+    // Snake
     snake.forEach(([x, y], i) => {
-      ctx.fillStyle = i === 0 ? "#7CFC00" : `hsl(${120 + i * 5}, 70%, 50%)`;
-      ctx.shadowColor = "rgba(0, 255, 0, 0.5)";
-      ctx.shadowBlur = 6;
+      ctx.fillStyle = i === 0 ? `hsl(${(Date.now() / 2) % 360}, 100%, 60%)` : `hsl(${(120 + i * 8) % 360}, 70%, 50%)`;
+      ctx.shadowColor = "rgba(0, 255, 0, 0.6)";
+      ctx.shadowBlur = i === 0 ? 12 : 6;
       ctx.beginPath();
       ctx.roundRect(
         x * cellSize,
         y * cellSize + HUD_HEIGHT,
         cellSize,
         cellSize,
-        5
+        6
       );
       ctx.fill();
     });
     ctx.shadowBlur = 0;
 
-    // Draw food with pulse effect
-    ctx.fillStyle = "red";
-    ctx.shadowColor = "rgba(255, 0, 0, 0.6)";
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    ctx.arc(
+    // Food
+    ctx.fillStyle = "#ff5050";
+    ctx.shadowColor = "rgba(255, 0, 0, 0.8)";
+    ctx.shadowBlur = 15;
+    ctx.save();
+    ctx.translate(
       food[0] * cellSize + cellSize / 2,
-      food[1] * cellSize + HUD_HEIGHT + cellSize / 2,
-      cellSize / 2,
-      0,
-      2 * Math.PI
+      food[1] * cellSize + HUD_HEIGHT + cellSize / 2
     );
-    ctx.fill();
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-pulse / 2, -pulse / 2, pulse, pulse);
+    ctx.restore();
     ctx.shadowBlur = 0;
   }, [snake, food, canvasSize]);
 
@@ -146,7 +146,7 @@ export default function SnakeGame({ onExit }) {
         }
         return [newHead, ...prevSnake.slice(0, -1)];
       });
-    }, 150);
+    }, 130);
     return () => clearInterval(interval);
   }, [dir, food, running, highScores, score, playerName, cols, rows]);
 
@@ -173,7 +173,6 @@ export default function SnakeGame({ onExit }) {
         className="absolute top-0 left-0"
       />
 
-      {/* Interfejs gracza */}
       <div className="absolute top-0 left-0 w-full p-4 text-white text-center z-10 bg-black bg-opacity-80 backdrop-blur-md">
         <input
           type="text"
