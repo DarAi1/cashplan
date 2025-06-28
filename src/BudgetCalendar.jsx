@@ -45,20 +45,21 @@ export default function BudgetCalendar() {
   const offset = firstDay === 0 ? 6 : firstDay - 1;
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
+  const monthName = today.toLocaleString("en-GB", { month: "long" });
+  const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
   return (
-    <div className="p-4 text-gray-800 dark:text-gray-100">
-      <h1 className="text-2xl font-bold mb-4">
-        CashPlan – {today.toLocaleString("pl-PL", { month: "long" })} {currentYear}
+    <div className="p-4 text-gray-900 dark:text-gray-50 bg-white dark:bg-black min-h-screen transition-colors">
+      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+        CashPlan – {monthName} {currentYear}
       </h1>
       <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">
-        {["Pn", "Wt", "Śr", "Cz", "Pt", "Sb", "Nd"].map((d) => (
+        {weekDays.map((d) => (
           <div key={d}>{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-2">
-        {[...Array(offset)].map(function (_, i) {
-          return <div key={"e-" + i}></div>;
-        })}
+        {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
         {days.map((day) => {
           const key = currentYear + "-" + currentMonth + "-" + day;
           const daily = entries[key] || [];
@@ -72,22 +73,16 @@ export default function BudgetCalendar() {
             <div
               key={day}
               onClick={() => openModal(day)}
-              className={
-                "border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 " +
-                (isFriday ? "bg-payday/20 dark:bg-payday/30" : "")
-              }
-              title="Kliknij aby dodać wpis"
+              className={`border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${isFriday ? "bg-yellow-100 dark:bg-yellow-800" : ""}`}
+              title="Click to add entry"
             >
               <div className="font-semibold">{day}</div>
               {daily.map((e, i) => (
                 <div
                   key={i}
-                  className={
-                    "text-xs " + (e.type === "income" ? "text-green-600" : "text-red-500")
-                  }
+                  className={`text-xs ${e.type === "income" ? "text-green-600" : "text-red-500"}`}
                 >
-                  {e.type === "income" ? "+" : "-"}
-                  {e.amount.toFixed(2)} £
+                  {e.type === "income" ? "+" : "-"}{e.amount.toFixed(2)} £
                 </div>
               ))}
               <div className="text-xs text-gray-500 mt-1">
@@ -100,32 +95,22 @@ export default function BudgetCalendar() {
 
       {modalDay && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg w-80">
-            <h2 className="text-lg font-bold mb-3">
-              Dodaj wpis – {modalDay}.{currentMonth + 1}.{currentYear}
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg w-80 animate-fade-in">
+            <h2 className="text-lg font-bold mb-3 text-gray-800 dark:text-gray-100">
+              Add entry – {modalDay}.{currentMonth + 1}.{currentYear}
             </h2>
             <div className="flex gap-2 mb-3">
               <button
                 onClick={() => setEntryType("income")}
-                className={
-                  "flex-1 py-1 rounded border " +
-                  (entryType === "income"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 dark:bg-gray-700")
-                }
+                className={`flex-1 py-1 rounded border ${entryType === "income" ? "bg-green-100 text-green-800" : "bg-gray-100 dark:bg-gray-700"}`}
               >
-                ➕ Dochód
+                ➕ Income
               </button>
               <button
                 onClick={() => setEntryType("expense")}
-                className={
-                  "flex-1 py-1 rounded border " +
-                  (entryType === "expense"
-                    ? "bg-red-100 text-red-800"
-                    : "bg-gray-100 dark:bg-gray-700")
-                }
+                className={`flex-1 py-1 rounded border ${entryType === "expense" ? "bg-red-100 text-red-800" : "bg-gray-100 dark:bg-gray-700"}`}
               >
-                ➖ Wydatek
+                ➖ Expense
               </button>
             </div>
             <input
@@ -133,20 +118,20 @@ export default function BudgetCalendar() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full p-2 mb-3 rounded border dark:bg-gray-700"
-              placeholder="Kwota"
+              placeholder="Amount"
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={closeModal}
-                className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-600"
+                className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100"
               >
-                Anuluj
+                Cancel
               </button>
               <button
                 onClick={saveEntry}
                 className="px-3 py-1 rounded bg-blue-600 text-white"
               >
-                Zapisz
+                Save
               </button>
             </div>
           </div>
