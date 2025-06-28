@@ -69,6 +69,12 @@ export default function SnakeGame({ onExit }) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw border
+    ctx.strokeStyle = "#00BFFF";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, HUD_HEIGHT, cols * cellSize, rows * cellSize);
+
     ctx.fillStyle = "lime";
     snake.forEach(([x, y]) => ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize));
     ctx.fillStyle = "red";
@@ -78,12 +84,13 @@ export default function SnakeGame({ onExit }) {
   useEffect(() => {
     if (!running) return;
     const interval = setInterval(() => {
-      setSnake(([head, ...tail]) => {
+      setSnake((prevSnake) => {
+        const [head, ...tail] = prevSnake;
         const newHead = [head[0] + dir[0], head[1] + dir[1]];
         if (
           newHead[0] < 0 || newHead[0] >= cols ||
           newHead[1] < 0 || newHead[1] >= rows ||
-          tail.some(([x, y]) => x === newHead[0] && y === newHead[1])
+          prevSnake.some(([x, y]) => x === newHead[0] && y === newHead[1])
         ) {
           const newEntry = { name: playerName || "Anon", score };
           const updatedScores = [...highScores, newEntry].sort((a, b) => b.score - a.score).slice(0, 10);
@@ -100,9 +107,9 @@ export default function SnakeGame({ onExit }) {
             Math.floor(Math.random() * rows),
           ]);
           setScore((prev) => prev + 1);
-          return [newHead, ...[head, ...tail]];
+          return [newHead, ...prevSnake];
         }
-        return [newHead, ...tail.slice(0, -1)];
+        return [newHead, ...prevSnake.slice(0, -1)];
       });
     }, 150);
     return () => clearInterval(interval);
