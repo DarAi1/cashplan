@@ -43,7 +43,6 @@ export default function SnakeGame({ onExit }) {
   const HUD_HEIGHT = 140;
   const cols = Math.floor(canvasSize.width / cellSize);
   const rows = Math.floor((canvasSize.height - HUD_HEIGHT) / cellSize);
-  const pulse = Math.sin(Date.now() / 200) * 2 + 4;
 
   const themeStyles = {
     neon: {
@@ -75,22 +74,6 @@ export default function SnakeGame({ onExit }) {
     return () => window.removeEventListener("resize", updateCanvasSize);
   }, []);
 
-  const unlockAchievement = (key, message) => {
-    if (!achievements[key]) {
-      const updated = { ...achievements, [key]: true };
-      setAchievements(updated);
-      localStorage.setItem("snake-achievements", JSON.stringify(updated));
-      setAchievementMessage(message);
-      setTimeout(() => setAchievementMessage(""), 3000);
-    }
-  };
-
-  useEffect(() => {
-    if (!achievements.changedTheme && theme !== "neon") {
-      unlockAchievement("changedTheme", "🎨 Stylówka zmieniona!");
-    }
-  }, [theme]);
-
   useEffect(() => {
     if (!running || gameOver) return;
 
@@ -99,16 +82,10 @@ export default function SnakeGame({ onExit }) {
         const newHead = [prev[0][0] + dir[0], prev[0][1] + dir[1]];
         const newSnake = [newHead, ...prev];
 
-        const hitWall =
-          newHead[0] < 0 || newHead[1] < 0 ||
-          newHead[0] >= cols || newHead[1] >= rows;
-
-        const hitSelf = prev.some(
-          ([x, y]) => x === newHead[0] && y === newHead[1]
-        );
+        const hitWall = newHead[0] < 0 || newHead[1] < 0 || newHead[0] >= cols || newHead[1] >= rows;
+        const hitSelf = prev.some(([x, y]) => x === newHead[0] && y === newHead[1]);
 
         if (hitWall || hitSelf) {
-          playSound(thudSound);
           setGameOver(true);
           setRunning(false);
           return prev;
@@ -116,12 +93,8 @@ export default function SnakeGame({ onExit }) {
 
         const foundFood = newHead[0] === food[0] && newHead[1] === food[1];
         if (foundFood) {
-          playSound(popSound);
           setScore((s) => s + 1);
-          setFood([
-            Math.floor(Math.random() * cols),
-            Math.floor(Math.random() * rows),
-          ]);
+          setFood([Math.floor(Math.random() * cols), Math.floor(Math.random() * rows)]);
           return newSnake;
         } else {
           return newSnake.slice(0, -1);
@@ -130,9 +103,50 @@ export default function SnakeGame({ onExit }) {
     }, 150);
 
     return () => clearInterval(interval);
-  }, [dir, running, food, gameOver]);
+  }, [dir, running, food, gameOver, cols, rows]);
 
-  // Dotykowe sterowanie
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        ctx.fillStyle = themeStyles.backgroundGrid(x, y);
+        ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
+      }
+    }
+
+    ctx.strokeStyle = themeStyles.border;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, HUD_HEIGHT + 2, cols * cellSize - 4, rows * cellSize - 4);
+
+    snake.forEach(([x, y], i) => {
+      ctx.fillStyle = i === 0 ? themeStyles.head : themeStyles.body(i);
+      ctx.shadowColor = "rgba(0, 255, 0, 0.6)";
+      ctx.shadowBlur = i === 0 ? 12 : 6;
+      ctx.beginPath();
+      ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#ff5050";
+    ctx.shadowColor = "rgba(255, 0, 0, 0.8)";
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(
+      food[0] * cellSize + cellSize / 2,
+      food[1] * cellSize + HUD_HEIGHT + cellSize / 2,
+      6,
+      0,
+      2 * Math.PI
+    );
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }, [snake, food, canvasSize, theme]);
+
   useEffect(() => {
     const handleTouchStart = (e) => {
       const touch = e.touches[0];
@@ -164,11 +178,6 @@ export default function SnakeGame({ onExit }) {
     };
   }, [touchStart, dir]);
 
-  const handleThemeChange = (newTheme) => {
-    playSound(clickSound);
-    setTheme(newTheme);
-  };
-
   return (
     <div className="fixed inset-0 bg-black z-50">
       <canvas
@@ -191,7 +200,7 @@ export default function SnakeGame({ onExit }) {
           {['neon', 'dark', 'retro'].map((t) => (
             <button
               key={t}
-              onClick={() => handleThemeChange(t)}
+              onClick={() => setTheme(t)}
               className={`px-2 py-1 rounded ${theme === t ? 'bg-yellow-400 text-black' : 'bg-gray-600 text-white'}`}
             >
               {t}
