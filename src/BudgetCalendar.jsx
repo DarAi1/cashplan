@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import SnakeGame from "./SnakeGame";
 
 export default function BudgetCalendar() {
@@ -115,23 +115,28 @@ export default function BudgetCalendar() {
             {days.map((day) => {
               const key = `${currentYear}-${currentMonth}-${day}`;
               const daily = entries[key] || [];
-              const total = daily.reduce((acc, e) => acc + (e.type === "income" ? e.amount : -e.amount), 0);
+              const totalIncome = daily.filter(e => e.type === "income").reduce((sum, e) => sum + e.amount, 0);
+              const totalExpense = daily.filter(e => e.type === "expense").reduce((sum, e) => sum + e.amount, 0);
               const isFriday = new Date(currentYear, currentMonth, day).getDay() === 5;
 
               return (
                 <div
                   key={day}
                   onClick={() => openModal(day)}
-                  className={`border p-1 rounded-lg cursor-pointer hover:bg-white/10 backdrop-blur-md transition-colors ${isFriday ? 'border-4 border-yellow-400' : 'border-white/60'}`}
+                  className={`h-24 border rounded-lg cursor-pointer hover:bg-white/10 backdrop-blur-md transition-colors flex flex-col justify-between p-1 ${isFriday ? 'border-4 border-yellow-400' : 'border-white/60'}`}
                   title="Click to add entry"
                 >
-                  <div className="font-semibold text-black">{day}</div>
-                  {daily.map((e, i) => (
-                    <div key={i} className={`text-xs ${e.type === "income" ? "text-green-600" : "text-red-500"}`}>
-                      {e.type === "income" ? "+" : "-"}{e.amount.toFixed(2)} £
-                    </div>
-                  ))}
-                  <div className="text-xs text-gray-700 mt-1">= {total.toFixed(2)} £</div>
+                  <div className="font-semibold text-black text-sm text-center">{day}</div>
+                  <div className="flex flex-col justify-end h-full gap-0.5 px-2">
+                    <div
+                      className="bg-green-500 w-full"
+                      style={{ height: `${Math.min((totalIncome / (totalIncome + totalExpense)) * 100, 100)}%` }}
+                    ></div>
+                    <div
+                      className="bg-red-500 w-full"
+                      style={{ height: `${Math.min((totalExpense / (totalIncome + totalExpense)) * 100, 100)}%` }}
+                    ></div>
+                  </div>
                 </div>
               );
             })}
