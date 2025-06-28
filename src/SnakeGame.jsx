@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 export default function SnakeGame({ onExit }) {
   const canvasRef = useRef(null);
-  const [snake, setSnake] = useState([[10, 10]]);
-  const [food, setFood] = useState([15, 15]);
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const [snake, setSnake] = useState([[5, 5]]);
+  const [food, setFood] = useState([10, 10]);
   const [dir, setDir] = useState([1, 0]);
   const [running, setRunning] = useState(true);
   const [score, setScore] = useState(0);
@@ -13,6 +14,19 @@ export default function SnakeGame({ onExit }) {
     const stored = localStorage.getItem("snake-highscores");
     return stored ? JSON.parse(stored) : [];
   });
+
+  const cellSize = 20;
+  const cols = Math.floor(canvasSize.width / cellSize);
+  const rows = Math.floor(canvasSize.height / cellSize);
+
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      setCanvasSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    updateCanvasSize();
+    window.addEventListener("resize", updateCanvasSize);
+    return () => window.removeEventListener("resize", updateCanvasSize);
+  }, []);
 
   useEffect(() => {
     let startX = 0;
@@ -25,6 +39,7 @@ export default function SnakeGame({ onExit }) {
     };
 
     const handleTouchMove = (e) => {
+      e.preventDefault();
       if (!startX || !startY) return;
       const touch = e.touches[0];
       const dx = touch.clientX - startX;
@@ -39,8 +54,8 @@ export default function SnakeGame({ onExit }) {
       startY = 0;
     };
 
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchmove", handleTouchMove);
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
       window.removeEventListener("touchstart", handleTouchStart);
@@ -50,13 +65,14 @@ export default function SnakeGame({ onExit }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "lime";
-    snake.forEach(([x, y]) => ctx.fillRect(x * 10, y * 10, 10, 10));
+    snake.forEach(([x, y]) => ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize));
     ctx.fillStyle = "red";
-    ctx.fillRect(food[0] * 10, food[1] * 10, 10, 10);
-  }, [snake, food]);
+    ctx.fillRect(food[0] * cellSize, food[1] * cellSize, cellSize, cellSize);
+  }, [snake, food, canvasSize]);
 
   useEffect(() => {
     if (!running) return;
@@ -64,36 +80,37 @@ export default function SnakeGame({ onExit }) {
       setSnake(([head, ...tail]) => {
         const newHead = [head[0] + dir[0], head[1] + dir[1]];
         if (
-          newHead[0] < 0 || newHead[0] >= 30 ||
-          newHead[1] < 0 || newHead[1] >= 60 ||
+          newHead[0] < 0 || newHead[0] >= cols ||
+          newHead[1] < 0 || newHead[1] >= rows ||
           tail.some(([x, y]) => x === newHead[0] && y === newHead[1])
         ) {
           const newEntry = { name: playerName || "Anon", score };
-          const updatedScores = [...highScores, newEntry]
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10);
+          const updatedScores = [...highScores, newEntry].sort((a, b) => b.score - a.score).slice(0, 10);
           setHighScores(updatedScores);
           localStorage.setItem("snake-highscores", JSON.stringify(updatedScores));
           setGameOver(true);
           setRunning(false);
-          return [[10, 10]];
+          return [[5, 5]];
         }
         const grow = newHead[0] === food[0] && newHead[1] === food[1];
         if (grow) {
-          setFood([Math.floor(Math.random() * 30), Math.floor(Math.random() * 60)]);
-          setScore(prev => prev + 1);
+          setFood([
+            Math.floor(Math.random() * cols),
+            Math.floor(Math.random() * rows),
+          ]);
+          setScore((prev) => prev + 1);
           return [newHead, head, ...tail];
         }
         return [newHead, ...tail.slice(0, -1)];
       });
     }, 150);
     return () => clearInterval(interval);
-  }, [dir, food, running, highScores, score, playerName]);
+  }, [dir, food, running, highScores, score, playerName, cols, rows]);
 
   const handleRestart = () => {
-    setSnake([[10, 10]]);
+    setSnake([[5, 5]]);
     setDir([1, 0]);
-    setFood([15, 15]);
+    setFood([10, 10]);
     setScore(0);
     setRunning(true);
     setGameOver(false);
@@ -116,8 +133,8 @@ export default function SnakeGame({ onExit }) {
       <div className="text-lg font-bold mb-2">Score: {score}</div>
       <canvas
         ref={canvasRef}
-        width={300}
-        height={600}
+        width={canvasSize.width}
+        height={canvasSize.height}
         className="border border-gray-300"
       />
       {gameOver && (
