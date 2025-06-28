@@ -56,7 +56,9 @@ export default function BudgetCalendar() {
         ))}
       </div>
       <div className="grid grid-cols-7 gap-2">
-        {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
+        {[...Array(offset)].map(function(_, i) {
+  return <div key={"e-" + i}></div>;
+})}
         {days.map((day) => {
           const key = ${currentYear}-${currentMonth}-${day};
           const daily = entries[key] || [];
