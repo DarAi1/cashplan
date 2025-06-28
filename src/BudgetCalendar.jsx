@@ -39,7 +39,13 @@ export default function BudgetCalendar() {
     const newEntry = { type: entryType, amount: value };
     const existing = entries[key] || [];
     setEntries({ ...entries, [key]: [...existing, newEntry] });
-    closeModal();
+    setAmount("");
+  };
+
+  const deleteEntry = (idx) => {
+    const key = `${currentYear}-${currentMonth}-${modalDay}`;
+    const updated = entries[key].filter((_, i) => i !== idx);
+    setEntries({ ...entries, [key]: updated });
   };
 
   const handlePrevMonth = () => {
@@ -71,6 +77,9 @@ export default function BudgetCalendar() {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const monthName = new Date(currentYear, currentMonth).toLocaleString("en-GB", { month: "long" });
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const selectedKey = `${currentYear}-${currentMonth}-${modalDay}`;
+  const selectedEntries = entries[selectedKey] || [];
 
   return (
     <div
@@ -130,11 +139,11 @@ export default function BudgetCalendar() {
                   <div className="flex flex-col justify-end h-full gap-0.5 px-2">
                     <div
                       className="bg-green-500 w-full"
-                      style={{ height: `${Math.min((totalIncome / (totalIncome + totalExpense)) * 100, 100)}%` }}
+                      style={{ height: `${Math.min((totalIncome / (totalIncome + totalExpense || 1)) * 100, 100)}%` }}
                     ></div>
                     <div
                       className="bg-red-500 w-full"
-                      style={{ height: `${Math.min((totalExpense / (totalIncome + totalExpense)) * 100, 100)}%` }}
+                      style={{ height: `${Math.min((totalExpense / (totalIncome + totalExpense || 1)) * 100, 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -157,8 +166,28 @@ export default function BudgetCalendar() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white/70 backdrop-blur-xl p-4 rounded-xl shadow-lg w-80">
             <h2 className="text-lg font-bold mb-3 text-center text-black">
-              Add Entry – {modalDay}.{currentMonth + 1}.{currentYear}
+              Entries – {modalDay}.{currentMonth + 1}.{currentYear}
             </h2>
+            <div className="mb-3 max-h-40 overflow-y-auto text-sm text-black">
+              {selectedEntries.length > 0 ? (
+                <ul className="space-y-1">
+                  {selectedEntries.map((entry, idx) => (
+                    <li key={idx} className="flex justify-between items-center border-b pb-1">
+                      <span className={entry.type === "income" ? "text-green-700" : "text-red-700"}>
+                        {entry.type === "income" ? "Income" : "Expense"}:
+                      </span>
+                      <span>{entry.amount.toFixed(2)} £</span>
+                      <button
+                        onClick={() => deleteEntry(idx)}
+                        className="ml-2 text-xs text-red-600 hover:text-red-800"
+                      >✖</button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-center italic">No entries for this day.</p>
+              )}
+            </div>
             <div className="flex gap-2 mb-3">
               <button
                 onClick={() => setEntryType("income")}
@@ -181,7 +210,7 @@ export default function BudgetCalendar() {
               placeholder="Amount"
             />
             <div className="flex justify-end gap-2">
-              <button onClick={closeModal} className="px-3 py-1 rounded bg-gray-300 text-black">Cancel</button>
+              <button onClick={closeModal} className="px-3 py-1 rounded bg-gray-300 text-black">Close</button>
               <button onClick={saveEntry} className="px-3 py-1 rounded bg-blue-600 text-white">Save</button>
             </div>
           </div>
