@@ -143,10 +143,94 @@ export default function BudgetCalendar() {
         backgroundRepeat: "no-repeat"
       }}
     >
-      {showSnake && <SnakeGame onExit={() => setShowSnake(false)} />}
+      {showSnake ? (
+        <SnakeGame onExit={() => setShowSnake(false)} />
+      ) : (
+        <div>
+          {/* App content goes here (navigation, calendar, modals, etc.) */}
+          <h1 className="text-2xl font-bold text-center">CashPlan</h1>
+          <p className="text-center text-lg mb-2">{monthName} {currentYear}</p>
+          <button onClick={handleResetToday} className="block mx-auto mb-4 px-4 py-2 rounded bg-gray-700 text-white">Today</button>
+          <div className="flex justify-between mb-2">
+            <button onClick={handlePrevMonth} className="px-2">⬅️</button>
+            <button onClick={handleNextMonth} className="px-2">➡️</button>
+          </div>
+          <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">
+            {weekDays.map((d) => (
+              <div key={d}>{d}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-2">
+            {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
+            {days.map((day) => {
+              const key = `${currentYear}-${currentMonth}-${day}`;
+              const daily = entries[key] || [];
+              const total = daily.reduce((acc, e) => acc + (e.type === "income" ? e.amount : -e.amount), 0);
+              const isFriday = new Date(currentYear, currentMonth, day).getDay() === 5;
 
-      {/* Rest of the BudgetCalendar UI remains unchanged */}
-      {/* ... */}
+              return (
+                <div
+                  key={day}
+                  onClick={() => openModal(day)}
+                  className={`border p-1 rounded cursor-pointer hover:bg-white/10 backdrop-blur-md transition-colors ${isFriday ? 'border-4 border-yellow-400' : ''}`}
+                  title="Click to add entry"
+                >
+                  <div className="font-semibold">{day}</div>
+                  {daily.map((e, i) => (
+                    <div key={i} className={`text-xs ${e.type === "income" ? "text-green-600" : "text-red-500"}`}>
+                      {e.type === "income" ? "+" : "-"}{e.amount.toFixed(2)} £
+                    </div>
+                  ))}
+                  <div className="text-xs text-gray-700 mt-1">= {total.toFixed(2)} £</div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="fixed bottom-4 left-0 right-0 flex justify-center">
+            <button
+              onClick={() => setShowSnake(true)}
+              className="px-4 py-2 rounded-full bg-black/70 text-white shadow-md backdrop-blur"
+            >
+              Relax Mode
+            </button>
+          </div>
+        </div>
+      )}
+
+      {modalDay && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white/70 backdrop-blur-xl p-4 rounded-xl shadow-lg w-80">
+            <h2 className="text-lg font-bold mb-3 text-center">
+              Add Entry – {modalDay}.{currentMonth + 1}.{currentYear}
+            </h2>
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={() => setEntryType("income")}
+                className={`flex-1 py-1 rounded border ${entryType === "income" ? "bg-green-100 text-green-800" : "bg-gray-100"}`}
+              >
+                ➕ Income
+              </button>
+              <button
+                onClick={() => setEntryType("expense")}
+                className={`flex-1 py-1 rounded border ${entryType === "expense" ? "bg-red-100 text-red-800" : "bg-gray-100"}`}
+              >
+                ➖ Expense
+              </button>
+            </div>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-full p-2 mb-3 rounded border"
+              placeholder="Amount"
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={closeModal} className="px-3 py-1 rounded bg-gray-300">Cancel</button>
+              <button onClick={saveEntry} className="px-3 py-1 rounded bg-blue-600 text-white">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
