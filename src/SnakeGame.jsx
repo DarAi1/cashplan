@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function SnakeGame({ onExit }) {
   const canvasRef = useRef(null);
@@ -6,24 +6,50 @@ export default function SnakeGame({ onExit }) {
   const [food, setFood] = useState([15, 15]);
   const [dir, setDir] = useState([1, 0]);
   const [running, setRunning] = useState(true);
+  const [score, setScore] = useState(0);
+  const [playerName, setPlayerName] = useState("");
+  const [gameOver, setGameOver] = useState(false);
+  const [highScores, setHighScores] = useState(() => {
+    const stored = localStorage.getItem("snake-highscores");
+    return stored ? JSON.parse(stored) : [];
+  });
 
   useEffect(() => {
-    const handleKey = (e) => {
-      switch (e.key) {
-        case "ArrowUp": setDir([0, -1]); break;
-        case "ArrowDown": setDir([0, 1]); break;
-        case "ArrowLeft": setDir([-1, 0]); break;
-        case "ArrowRight": setDir([1, 0]); break;
-        default: break;
-      }
+    let startX = 0;
+    let startY = 0;
+
+    const handleTouchStart = (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+
+    const handleTouchMove = (e) => {
+      if (!startX || !startY) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        setDir(dx > 0 ? [1, 0] : [-1, 0]);
+      } else {
+        setDir(dy > 0 ? [0, 1] : [0, -1]);
+      }
+      startX = 0;
+      startY = 0;
+    };
+
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchmove", handleTouchMove);
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
   }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "lime";
@@ -39,39 +65,92 @@ export default function SnakeGame({ onExit }) {
         const newHead = [head[0] + dir[0], head[1] + dir[1]];
         if (
           newHead[0] < 0 || newHead[0] >= 30 ||
-          newHead[1] < 0 || newHead[1] >= 30 ||
+          newHead[1] < 0 || newHead[1] >= 60 ||
           tail.some(([x, y]) => x === newHead[0] && y === newHead[1])
         ) {
+          const newEntry = { name: playerName || "Anon", score };
+          const updatedScores = [...highScores, newEntry]
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10);
+          setHighScores(updatedScores);
+          localStorage.setItem("snake-highscores", JSON.stringify(updatedScores));
+          setGameOver(true);
           setRunning(false);
           return [[10, 10]];
         }
         const grow = newHead[0] === food[0] && newHead[1] === food[1];
         if (grow) {
-          setFood([Math.floor(Math.random() * 30), Math.floor(Math.random() * 30)]);
+          setFood([Math.floor(Math.random() * 30), Math.floor(Math.random() * 60)]);
+          setScore(prev => prev + 1);
           return [newHead, head, ...tail];
         }
         return [newHead, ...tail.slice(0, -1)];
       });
     }, 150);
     return () => clearInterval(interval);
-  }, [dir, food, running]);
+  }, [dir, food, running, highScores, score, playerName]);
+
+  const handleRestart = () => {
+    setSnake([[10, 10]]);
+    setDir([1, 0]);
+    setFood([15, 15]);
+    setScore(0);
+    setRunning(true);
+    setGameOver(false);
+  };
+
+  const handleResetScores = () => {
+    localStorage.removeItem("snake-highscores");
+    setHighScores([]);
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex flex-col items-center justify-center">
-      <div className="bg-white rounded-xl shadow-xl p-4">
-        <canvas
-          ref={canvasRef}
-          width={300}
-          height={300}
-          className="mb-4 border border-gray-300"
-        />
+    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center text-white">
+      <input
+        type="text"
+        value={playerName}
+        onChange={(e) => setPlayerName(e.target.value)}
+        placeholder="Enter your name"
+        className="mb-2 px-3 py-1 rounded text-black"
+      />
+      <div className="text-lg font-bold mb-2">Score: {score}</div>
+      <canvas
+        ref={canvasRef}
+        width={300}
+        height={600}
+        className="border border-gray-300"
+      />
+      {gameOver && (
+        <div className="mt-4 text-center">
+          <p className="text-red-400 font-bold">Game Over!</p>
+          <button
+            onClick={handleRestart}
+            className="mt-2 px-4 py-1 rounded bg-green-600 hover:bg-green-700"
+          >
+            Restart
+          </button>
+        </div>
+      )}
+      <div className="mt-4 text-sm">
+        <h2 className="font-bold mb-1">Top 10 Scores:</h2>
+        <ol className="list-decimal ml-4">
+          {highScores.map((s, i) => (
+            <li key={i}>{s.name}: {s.score}</li>
+          ))}
+        </ol>
         <button
-          onClick={onExit}
-          className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
+          onClick={handleResetScores}
+          className="mt-2 px-3 py-1 rounded bg-yellow-600 hover:bg-yellow-700"
         >
-          Exit
+          Reset Scores
         </button>
       </div>
+      <button
+        onClick={onExit}
+        className="mt-4 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
+      >
+        Exit
+      </button>
     </div>
   );
 }
