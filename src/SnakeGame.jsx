@@ -90,89 +90,39 @@ export default function SnakeGame({ onExit }) {
     return () => clearInterval(interval);
   }, [running, food, gameOver, cols, rows]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  };
 
-    for (let x = 0; x < cols; x++) {
-      for (let y = 0; y < rows; y++) {
-        ctx.fillStyle = themeStyles.backgroundGrid(x, y);
-        ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
-      }
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!touchStart) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStart.x;
+    const dy = touch.clientY - touchStart.y;
+
+    let newDir = dirRef.current;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 30 && dir[0] !== -1) newDir = [1, 0];
+      else if (dx < -30 && dir[0] !== 1) newDir = [-1, 0];
+    } else {
+      if (dy > 30 && dir[1] !== -1) newDir = [0, 1];
+      else if (dy < -30 && dir[1] !== 1) newDir = [0, -1];
     }
-
-    ctx.strokeStyle = themeStyles.border;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(2, HUD_HEIGHT + 2, cols * cellSize - 4, rows * cellSize - 4);
-
-    snake.forEach(([x, y], i) => {
-      ctx.fillStyle = i === 0 ? themeStyles.head : themeStyles.body(i);
-      ctx.shadowColor = "rgba(0, 255, 0, 0.6)";
-      ctx.shadowBlur = i === 0 ? 12 : 6;
-      ctx.beginPath();
-      ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
-      ctx.fill();
-    });
-    ctx.shadowBlur = 0;
-
-    ctx.fillStyle = "#ff5050";
-    ctx.shadowColor = "rgba(255, 0, 0, 0.8)";
-    ctx.shadowBlur = 15;
-    ctx.beginPath();
-    ctx.arc(
-      food[0] * cellSize + cellSize / 2,
-      food[1] * cellSize + HUD_HEIGHT + cellSize / 2,
-      6,
-      0,
-      2 * Math.PI
-    );
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  }, [snake, food, canvasSize, theme]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleTouchStart = (e) => {
-      const touch = e.touches[0];
-      setTouchStart({ x: touch.clientX, y: touch.clientY });
-    };
-
-    const handleTouchMove = (e) => {
-      e.preventDefault();
-      if (!touchStart) return;
-      const touch = e.touches[0];
-      const dx = touch.clientX - touchStart.x;
-      const dy = touch.clientY - touchStart.y;
-
-      let newDir = dirRef.current;
-
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 30 && dir[0] !== -1) newDir = [1, 0];
-        else if (dx < -30 && dir[0] !== 1) newDir = [-1, 0];
-      } else {
-        if (dy > 30 && dir[1] !== -1) newDir = [0, 1];
-        else if (dy < -30 && dir[1] !== 1) newDir = [0, -1];
-      }
-      setDir(newDir);
-      dirRef.current = newDir;
-      setTouchStart(null);
-    };
-
-    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
-    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-
-    return () => {
-      canvas.removeEventListener("touchstart", handleTouchStart);
-      canvas.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, [touchStart, dir]);
+    setDir(newDir);
+    dirRef.current = newDir;
+    setTouchStart(null);
+  };
 
   return (
-    <div className="fixed inset-0 bg-black z-50">
+    <div
+      className="fixed inset-0 bg-black z-50"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+    >
       <canvas
         ref={canvasRef}
         width={canvasSize.width}
