@@ -12,7 +12,16 @@ export default function SnakeGame({ onExit }) {
   const [score, setScore] = useState(0);
   const [playerName, setPlayerName] = useState("");
   const [gameOver, setGameOver] = useState(false);
+  const [highScores, setHighScores] = useState(() => {
+    const stored = localStorage.getItem("snake-highscores");
+    return stored ? JSON.parse(stored) : [];
+  });
   const [theme, setTheme] = useState("neon");
+  const [achievements, setAchievements] = useState(() => {
+    const stored = localStorage.getItem("snake-achievements");
+    return stored ? JSON.parse(stored) : {};
+  });
+  const [achievementMessage, setAchievementMessage] = useState("");
 
   const cellSize = 20;
   const HUD_HEIGHT = 140;
@@ -79,7 +88,7 @@ export default function SnakeGame({ onExit }) {
     }, 150);
 
     return () => clearInterval(interval);
-  }, [running, gameOver, cols, rows]);
+  }, [running, food, gameOver, cols, rows]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -148,7 +157,6 @@ export default function SnakeGame({ onExit }) {
         if (dy > 30 && dir[1] !== -1) newDir = [0, 1];
         else if (dy < -30 && dir[1] !== 1) newDir = [0, -1];
       }
-
       setDir(newDir);
       dirRef.current = newDir;
       setTouchStart(null);
@@ -169,8 +177,8 @@ export default function SnakeGame({ onExit }) {
         ref={canvasRef}
         width={canvasSize.width}
         height={canvasSize.height}
-        style={{ touchAction: "none" }}
         className="absolute top-0 left-0"
+        style={{ touchAction: "none" }}
       />
 
       <div className="absolute top-0 left-0 w-full p-4 text-white text-center z-10 bg-black bg-opacity-80 backdrop-blur-md">
@@ -193,6 +201,7 @@ export default function SnakeGame({ onExit }) {
             </button>
           ))}
         </div>
+        {achievementMessage && <div className="mt-2 text-green-300 font-semibold animate-pulse">{achievementMessage}</div>}
       </div>
 
       {gameOver && (
