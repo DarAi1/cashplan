@@ -12,33 +12,7 @@ export default function SnakeGame({ onExit }) {
   const [score, setScore] = useState(0);
   const [playerName, setPlayerName] = useState("");
   const [gameOver, setGameOver] = useState(false);
-  const [highScores, setHighScores] = useState(() => {
-    const stored = localStorage.getItem("snake-highscores");
-    return stored ? JSON.parse(stored) : [];
-  });
   const [theme, setTheme] = useState("neon");
-  const [achievements, setAchievements] = useState(() => {
-    const stored = localStorage.getItem("snake-achievements");
-    return stored ? JSON.parse(stored) : {};
-  });
-  const [achievementMessage, setAchievementMessage] = useState("");
-
-  const popSound = useRef(null);
-  const thudSound = useRef(null);
-  const clickSound = useRef(null);
-
-  useEffect(() => {
-    popSound.current = new Audio("/sounds/pop.mp3");
-    thudSound.current = new Audio("/sounds/thud.mp3");
-    clickSound.current = new Audio("/sounds/click.mp3");
-  }, []);
-
-  const playSound = (ref) => {
-    if (ref.current) {
-      ref.current.currentTime = 0;
-      ref.current.play();
-    }
-  };
 
   const cellSize = 20;
   const HUD_HEIGHT = 140;
@@ -105,7 +79,7 @@ export default function SnakeGame({ onExit }) {
     }, 150);
 
     return () => clearInterval(interval);
-  }, [running, food, gameOver, cols, rows]);
+  }, [running, gameOver, cols, rows]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -150,6 +124,9 @@ export default function SnakeGame({ onExit }) {
   }, [snake, food, canvasSize, theme]);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const handleTouchStart = (e) => {
       const touch = e.touches[0];
       setTouchStart({ x: touch.clientX, y: touch.clientY });
@@ -171,17 +148,18 @@ export default function SnakeGame({ onExit }) {
         if (dy > 30 && dir[1] !== -1) newDir = [0, 1];
         else if (dy < -30 && dir[1] !== 1) newDir = [0, -1];
       }
+
       setDir(newDir);
       dirRef.current = newDir;
       setTouchStart(null);
     };
 
-    window.addEventListener("touchstart", handleTouchStart, { passive: false });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
     };
   }, [touchStart, dir]);
 
@@ -191,6 +169,7 @@ export default function SnakeGame({ onExit }) {
         ref={canvasRef}
         width={canvasSize.width}
         height={canvasSize.height}
+        style={{ touchAction: "none" }}
         className="absolute top-0 left-0"
       />
 
@@ -214,7 +193,6 @@ export default function SnakeGame({ onExit }) {
             </button>
           ))}
         </div>
-        {achievementMessage && <div className="mt-2 text-green-300 font-semibold animate-pulse">{achievementMessage}</div>}
       </div>
 
       {gameOver && (
