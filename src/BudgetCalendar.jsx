@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import SnakeGame from "./SnakeGame";
+
   const canvasRef = useRef(null);
   const [snake, setSnake] = useState([[10, 10]]);
   const [food, setFood] = useState([15, 15]);
