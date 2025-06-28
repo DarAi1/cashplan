@@ -34,7 +34,7 @@ export default function SnakeGame({ onExit }) {
   };
 
   const cellSize = 20;
-  const HUD_HEIGHT = 120;
+  const HUD_HEIGHT = 140;
   const cols = Math.floor(canvasSize.width / cellSize);
   const rows = Math.floor((canvasSize.height - HUD_HEIGHT) / cellSize);
   const pulse = Math.sin(Date.now() / 200) * 2 + 4;
@@ -67,6 +67,52 @@ export default function SnakeGame({ onExit }) {
     updateCanvasSize();
     window.addEventListener("resize", updateCanvasSize);
     return () => window.removeEventListener("resize", updateCanvasSize);
+  }, []);
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      switch (e.key) {
+        case "ArrowUp": setDir([0, -1]); break;
+        case "ArrowDown": setDir([0, 1]); break;
+        case "ArrowLeft": setDir([-1, 0]); break;
+        case "ArrowRight": setDir([1, 0]); break;
+      }
+    };
+
+    let startX = null;
+    let startY = null;
+
+    const handleTouchStart = (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (!startX || !startY) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        setDir(dx > 0 ? [1, 0] : [-1, 0]);
+      } else {
+        setDir(dy > 0 ? [0, 1] : [0, -1]);
+      }
+
+      startX = null;
+      startY = null;
+    };
+
+    window.addEventListener("keydown", handleKey);
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+    };
   }, []);
 
   useEffect(() => {
@@ -133,7 +179,7 @@ export default function SnakeGame({ onExit }) {
 
     ctx.strokeStyle = themeStyles.border;
     ctx.lineWidth = 4;
-    ctx.strokeRect(0, HUD_HEIGHT, cols * cellSize, rows * cellSize);
+    ctx.strokeRect(2, HUD_HEIGHT + 2, cols * cellSize - 4, rows * cellSize - 4);
 
     snake.forEach(([x, y], i) => {
       ctx.fillStyle = i === 0 ? themeStyles.head : themeStyles.body(i);
