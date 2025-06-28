@@ -122,52 +122,59 @@ export default function SnakeGame({ onExit }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center text-white">
-      <input
-        type="text"
-        value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
-        placeholder="Enter your name"
-        className="mb-2 px-3 py-1 rounded text-black"
-      />
-      <div className="text-lg font-bold mb-2">Score: {score}</div>
+    <div className="fixed inset-0 bg-black z-50">
       <canvas
         ref={canvasRef}
         width={canvasSize.width}
         height={canvasSize.height}
-        className="border border-gray-300"
+        className="absolute top-0 left-0"
       />
+
+      {/* Interfejs gracza */}
+      <div className="absolute top-4 left-4 right-4 flex flex-col items-center text-white z-10">
+        <input
+          type="text"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          placeholder="Enter your name"
+          className="mb-2 px-3 py-1 rounded text-black"
+        />
+        <div className="text-lg font-bold mb-2">Score: {score}</div>
+      </div>
+
       {gameOver && (
-        <div className="mt-4 text-center">
-          <p className="text-red-400 font-bold">Game Over!</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white z-20 bg-black bg-opacity-80">
+          <p className="text-red-400 font-bold text-xl mb-4">Game Over!</p>
           <button
             onClick={handleRestart}
-            className="mt-2 px-4 py-1 rounded bg-green-600 hover:bg-green-700"
+            className="mb-4 px-4 py-2 rounded bg-green-600 hover:bg-green-700"
           >
             Restart
           </button>
+
+          <div className="text-sm text-center">
+            <h2 className="font-bold mb-1">Top 10 Scores:</h2>
+            <ol className="list-decimal ml-4">
+              {highScores.map((s, i) => (
+                <li key={i}>{s.name}: {s.score}</li>
+              ))}
+            </ol>
+            <button
+              onClick={handleResetScores}
+              className="mt-2 px-3 py-1 rounded bg-yellow-600 hover:bg-yellow-700"
+            >
+              Reset Scores
+            </button>
+          </div>
+
+          <button
+            onClick={onExit}
+            className="mt-6 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
+          >
+            Exit
+          </button>
         </div>
       )}
-      <div className="mt-4 text-sm">
-        <h2 className="font-bold mb-1">Top 10 Scores:</h2>
-        <ol className="list-decimal ml-4">
-          {highScores.map((s, i) => (
-            <li key={i}>{s.name}: {s.score}</li>
-          ))}
-        </ol>
-        <button
-          onClick={handleResetScores}
-          className="mt-2 px-3 py-1 rounded bg-yellow-600 hover:bg-yellow-700"
-        >
-          Reset Scores
-        </button>
-      </div>
-      <button
-        onClick={onExit}
-        className="mt-4 px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition"
-      >
-        Exit
-      </button>
     </div>
   );
 }
