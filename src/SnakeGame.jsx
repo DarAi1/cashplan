@@ -85,69 +85,50 @@ export default function SnakeGame({ onExit }) {
   };
 
   useEffect(() => {
-    if (!running || gameOver) return;
-
-    const interval = setInterval(() => {
-      setSnake((prev) => {
-        const newHead = [prev[0][0] + dir[0], prev[0][1] + dir[1]];
-        const newSnake = [newHead, ...prev];
-
-        const hitWall =
-          newHead[0] < 0 || newHead[1] < 0 ||
-          newHead[0] >= cols || newHead[1] >= rows;
-
-        const hitSelf = prev.some(
-          ([x, y]) => x === newHead[0] && y === newHead[1]
-        );
-
-        if (hitWall || hitSelf) {
-          playSound(thudSound);
-          setGameOver(true);
-
-          if (score >= 20) unlockAchievement("crashedWithHonor", "💥 Zderzenie z rzeczywistością!");
-
-          const newEntry = { name: playerName || "Anon", score };
-          const updatedScores = [...highScores, newEntry]
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10);
-          setHighScores(updatedScores);
-          localStorage.setItem("snake-highscores", JSON.stringify(updatedScores));
-
-          setRunning(false);
-          return prev;
-        }
-
-        const foundFood = newHead[0] === food[0] && newHead[1] === food[1];
-        if (foundFood) {
-          playSound(popSound);
-          const newScore = score + 1;
-          setScore(newScore);
-          if (newScore >= 1) unlockAchievement("firstPoint", "🎉 Pierwszy punkt!");
-          if (newScore >= 10) unlockAchievement("tenPoints", "💪 Masz już 10 punktów!");
-          if (newScore >= 25) unlockAchievement("twentyFive", "🐍 Głodny punktów!");
-          if (newScore >= 50) unlockAchievement("fiftyPoints", "🔥 Nie do zatrzymania!");
-
-          setFood([
-            Math.floor(Math.random() * cols),
-            Math.floor(Math.random() * rows),
-          ]);
-          return newSnake;
-        } else {
-          return newSnake.slice(0, -1);
-        }
-      });
-    }, 150);
-
-    return () => clearInterval(interval);
-  }, [dir, running, food, gameOver, score]);
-
-  useEffect(() => {
     if (!achievements.changedTheme && theme !== "neon") {
       unlockAchievement("changedTheme", "🎨 Stylówka zmieniona!");
     }
   }, [theme]);
 
-  // ... pozostała część bez zmian ...
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        ctx.fillStyle = themeStyles.backgroundGrid(x, y);
+        ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
+      }
+    }
+
+    ctx.strokeStyle = themeStyles.border;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(2, HUD_HEIGHT + 2, cols * cellSize - 4, rows * cellSize - 4);
+
+    snake.forEach(([x, y], i) => {
+      ctx.fillStyle = i === 0 ? themeStyles.head : themeStyles.body(i);
+      ctx.shadowColor = "rgba(0, 255, 0, 0.6)";
+      ctx.shadowBlur = i === 0 ? 12 : 6;
+      ctx.beginPath();
+      ctx.roundRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize, 6);
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#ff5050";
+    ctx.shadowColor = "rgba(255, 0, 0, 0.8)";
+    ctx.shadowBlur = 15;
+    ctx.save();
+    ctx.translate(food[0] * cellSize + cellSize / 2, food[1] * cellSize + HUD_HEIGHT + cellSize / 2);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-pulse / 2, -pulse / 2, pulse, pulse);
+    ctx.restore();
+    ctx.shadowBlur = 0;
+  }, [snake, food, canvasSize, theme]);
+
+  // reszta kodu bez zmian...
 
   return (
     <div className="fixed inset-0 bg-black z-50">
