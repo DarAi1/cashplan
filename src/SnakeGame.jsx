@@ -16,8 +16,9 @@ export default function SnakeGame({ onExit }) {
   });
 
   const cellSize = 20;
+  const HUD_HEIGHT = 120;
   const cols = Math.floor(canvasSize.width / cellSize);
-  const rows = Math.floor(canvasSize.height / cellSize);
+  const rows = Math.floor((canvasSize.height - HUD_HEIGHT) / cellSize);
 
   useEffect(() => {
     const updateCanvasSize = () => {
@@ -69,9 +70,9 @@ export default function SnakeGame({ onExit }) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "lime";
-    snake.forEach(([x, y]) => ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize));
+    snake.forEach(([x, y]) => ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize));
     ctx.fillStyle = "red";
-    ctx.fillRect(food[0] * cellSize, food[1] * cellSize, cellSize, cellSize);
+    ctx.fillRect(food[0] * cellSize, food[1] * cellSize + HUD_HEIGHT, cellSize, cellSize);
   }, [snake, food, canvasSize]);
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export default function SnakeGame({ onExit }) {
             Math.floor(Math.random() * rows),
           ]);
           setScore((prev) => prev + 1);
-          return [newHead, head, ...tail];
+          return [newHead, ...[head, ...tail]];
         }
         return [newHead, ...tail.slice(0, -1)];
       });
@@ -131,7 +132,7 @@ export default function SnakeGame({ onExit }) {
       />
 
       {/* Interfejs gracza */}
-      <div className="absolute top-4 left-4 right-4 flex flex-col items-center text-white z-10">
+      <div className="absolute top-0 left-0 w-full p-4 text-white text-center z-10 bg-black">
         <input
           type="text"
           value={playerName}
