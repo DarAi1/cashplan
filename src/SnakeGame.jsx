@@ -59,6 +59,10 @@ export default function SnakeGame({ onExit }) {
   }, []);
 
   useEffect(() => {
+    dirRef.current = dir;
+  }, [dir]);
+
+  useEffect(() => {
     if (!running || gameOver) return;
 
     const interval = setInterval(() => {
