@@ -40,24 +40,58 @@ export default function BudgetCalendar() {
     closeModal();
   };
 
+  const handlePrevMonth = () => {
+    if (currentMonth === 0) {
+      setCurrentMonth(11);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 11) {
+      setCurrentMonth(0);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
+  const handleResetToday = () => {
+    setCurrentMonth(today.getMonth());
+    setCurrentYear(today.getFullYear());
+  };
+
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const offset = firstDay === 0 ? 6 : firstDay - 1;
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  const monthName = today.toLocaleString("en-GB", { month: "long" });
+  const monthName = new Date(currentYear, currentMonth).toLocaleString("en-GB", { month: "long" });
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
     <div className="p-4 text-gray-900 dark:text-gray-50 bg-white dark:bg-black min-h-screen transition-colors">
-      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
-        CashPlan – {monthName} {currentYear}
-      </h1>
+      <div className="flex justify-between items-center mb-4">
+        <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">←</button>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            CashPlan – {monthName} {currentYear}
+          </h1>
+          <button onClick={handleResetToday} className="mt-1 text-sm text-blue-600 hover:underline">
+            Today
+          </button>
+        </div>
+        <button onClick={handleNextMonth} className="text-lg px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">→</button>
+      </div>
+
       <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">
         {weekDays.map((d) => (
           <div key={d}>{d}</div>
         ))}
       </div>
+
       <div className="grid grid-cols-7 gap-2">
         {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
         {days.map((day) => {
