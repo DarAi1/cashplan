@@ -6,6 +6,7 @@ export default function SnakeGame({ onExit }) {
   const [snake, setSnake] = useState([[5, 5]]);
   const [food, setFood] = useState([10, 10]);
   const [dir, setDir] = useState([1, 0]);
+  const dirRef = useRef([1, 0]);
   const [touchStart, setTouchStart] = useState(null);
   const [running, setRunning] = useState(true);
   const [score, setScore] = useState(0);
@@ -79,7 +80,8 @@ export default function SnakeGame({ onExit }) {
 
     const interval = setInterval(() => {
       setSnake((prev) => {
-        const newHead = [prev[0][0] + dir[0], prev[0][1] + dir[1]];
+        const [dx, dy] = dirRef.current;
+        const newHead = [prev[0][0] + dx, prev[0][1] + dy];
         const newSnake = [newHead, ...prev];
 
         const hitWall = newHead[0] < 0 || newHead[1] < 0 || newHead[0] >= cols || newHead[1] >= rows;
@@ -103,7 +105,7 @@ export default function SnakeGame({ onExit }) {
     }, 150);
 
     return () => clearInterval(interval);
-  }, [dir, running, food, gameOver, cols, rows]);
+  }, [running, food, gameOver, cols, rows]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -160,13 +162,17 @@ export default function SnakeGame({ onExit }) {
       const dx = touch.clientX - touchStart.x;
       const dy = touch.clientY - touchStart.y;
 
+      let newDir = dirRef.current;
+
       if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 30 && dir[0] !== -1) setDir([1, 0]);
-        else if (dx < -30 && dir[0] !== 1) setDir([-1, 0]);
+        if (dx > 30 && dir[0] !== -1) newDir = [1, 0];
+        else if (dx < -30 && dir[0] !== 1) newDir = [-1, 0];
       } else {
-        if (dy > 30 && dir[1] !== -1) setDir([0, 1]);
-        else if (dy < -30 && dir[1] !== 1) setDir([0, -1]);
+        if (dy > 30 && dir[1] !== -1) newDir = [0, 1];
+        else if (dy < -30 && dir[1] !== 1) newDir = [0, -1];
       }
+      setDir(newDir);
+      dirRef.current = newDir;
       setTouchStart(null);
     };
 
@@ -210,6 +216,19 @@ export default function SnakeGame({ onExit }) {
         </div>
         {achievementMessage && <div className="mt-2 text-green-300 font-semibold animate-pulse">{achievementMessage}</div>}
       </div>
+
+      {gameOver && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 text-white text-center">
+          <h1 className="text-3xl font-bold mb-2">Game Over</h1>
+          <p className="mb-4 text-xl">Score: {score}</p>
+          <button
+            onClick={onExit}
+            className="px-4 py-2 bg-red-600 rounded hover:bg-red-700 transition"
+          >
+            Exit
+          </button>
+        </div>
+      )}
     </div>
   );
 }
