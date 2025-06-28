@@ -72,11 +72,11 @@ export default function BudgetCalendar() {
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <div className="p-4 text-gray-900 dark:text-gray-50 bg-white dark:bg-black min-h-screen transition-colors">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-2 sm:p-4 text-gray-900 dark:text-gray-50 bg-white dark:bg-black min-h-screen transition-colors">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2 mb-4">
         <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">←</button>
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
             CashPlan – {monthName} {currentYear}
           </h1>
           <button onClick={handleResetToday} className="mt-1 text-sm text-blue-600 hover:underline">
@@ -86,13 +86,13 @@ export default function BudgetCalendar() {
         <button onClick={handleNextMonth} className="text-lg px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">→</button>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 text-center font-medium mb-2">
+      <div className="grid grid-cols-7 gap-1 text-center font-medium mb-2 text-xs sm:text-sm">
         {weekDays.map((d) => (
           <div key={d}>{d}</div>
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-2 sm:gap-1 text-xs sm:text-sm">
+      <div className="grid grid-cols-7 gap-1 text-xs sm:text-sm">
         {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
         {days.map((day) => {
           const key = currentYear + "-" + currentMonth + "-" + day;
@@ -107,7 +107,7 @@ export default function BudgetCalendar() {
             <div
               key={day}
               onClick={() => openModal(day)}
-              className={`border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${isFriday ? "bg-yellow-200 dark:bg-yellow-700" : ""}`}
+              className={`border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${isFriday ? "bg-yellow-100 dark:bg-yellow-800" : ""}`}
               title="Click to add entry"
             >
               <div className="font-semibold text-sm sm:text-base">{day}</div>
@@ -129,7 +129,7 @@ export default function BudgetCalendar() {
 
       {modalDay && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg w-80 animate-fade-in">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg w-11/12 max-w-sm animate-fade-in">
             <h2 className="text-lg font-bold mb-3 text-gray-800 dark:text-gray-100">
               Add entry – {modalDay}.{currentMonth + 1}.{currentYear}
             </h2>
