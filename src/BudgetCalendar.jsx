@@ -92,7 +92,7 @@ export default function BudgetCalendar() {
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-2 sm:gap-1 text-xs sm:text-sm">
         {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
         {days.map((day) => {
           const key = currentYear + "-" + currentMonth + "-" + day;
@@ -107,10 +107,10 @@ export default function BudgetCalendar() {
             <div
               key={day}
               onClick={() => openModal(day)}
-              className={`border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${isFriday ? "bg-yellow-100 dark:bg-yellow-800" : ""}`}
+              className={`border p-1 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 ${isFriday ? "bg-yellow-200 dark:bg-yellow-700" : ""}`}
               title="Click to add entry"
             >
-              <div className="font-semibold">{day}</div>
+              <div className="font-semibold text-sm sm:text-base">{day}</div>
               {daily.map((e, i) => (
                 <div
                   key={i}
