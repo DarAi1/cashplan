@@ -70,31 +70,50 @@ export default function SnakeGame({ onExit }) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw glassy grid background
+    for (let x = 0; x < cols; x++) {
+      for (let y = 0; y < rows; y++) {
+        ctx.fillStyle = (x + y) % 2 === 0 ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)";
+        ctx.fillRect(x * cellSize, y * cellSize + HUD_HEIGHT, cellSize, cellSize);
+      }
+    }
+
     // Draw border
     ctx.strokeStyle = "#00BFFF";
     ctx.lineWidth = 2;
     ctx.strokeRect(0, HUD_HEIGHT, cols * cellSize, rows * cellSize);
 
-    // Draw snake with style
+    // Draw snake with animation
     snake.forEach(([x, y], i) => {
-      ctx.fillStyle = i === 0 ? "#7CFC00" : "#32CD32";
+      ctx.fillStyle = i === 0 ? "#7CFC00" : `hsl(${120 + i * 5}, 70%, 50%)`;
       ctx.shadowColor = "rgba(0, 255, 0, 0.5)";
-      ctx.shadowBlur = 4;
+      ctx.shadowBlur = 6;
       ctx.beginPath();
       ctx.roundRect(
         x * cellSize,
         y * cellSize + HUD_HEIGHT,
         cellSize,
         cellSize,
-        4
+        5
       );
       ctx.fill();
     });
     ctx.shadowBlur = 0;
 
-    // Draw food
+    // Draw food with pulse effect
     ctx.fillStyle = "red";
-    ctx.fillRect(food[0] * cellSize, food[1] * cellSize + HUD_HEIGHT, cellSize, cellSize);
+    ctx.shadowColor = "rgba(255, 0, 0, 0.6)";
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.arc(
+      food[0] * cellSize + cellSize / 2,
+      food[1] * cellSize + HUD_HEIGHT + cellSize / 2,
+      cellSize / 2,
+      0,
+      2 * Math.PI
+    );
+    ctx.fill();
+    ctx.shadowBlur = 0;
   }, [snake, food, canvasSize]);
 
   useEffect(() => {
@@ -155,7 +174,7 @@ export default function SnakeGame({ onExit }) {
       />
 
       {/* Interfejs gracza */}
-      <div className="absolute top-0 left-0 w-full p-4 text-white text-center z-10 bg-black">
+      <div className="absolute top-0 left-0 w-full p-4 text-white text-center z-10 bg-black bg-opacity-80 backdrop-blur-md">
         <input
           type="text"
           value={playerName}
