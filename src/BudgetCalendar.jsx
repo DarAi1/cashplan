@@ -72,7 +72,15 @@ export default function BudgetCalendar() {
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <div className="p-2 sm:p-4 text-gray-900 dark:text-gray-50 bg-white dark:bg-black min-h-screen transition-colors">
+    <div
+      className="p-2 sm:p-4 text-gray-900 dark:text-gray-50 min-h-screen transition-colors"
+      style={{
+        backgroundImage: "url('/TapetaGlass02.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      }}
+    >
       <div className="relative mb-4 rounded-xl backdrop-blur-md bg-white/30 dark:bg-white/10 border border-white/10 dark:border-white/5 shadow-md px-4 py-2 flex flex-col items-center sm:flex-row sm:justify-between sm:items-center">
         <div className="absolute left-4 top-1/2 -translate-y-1/2">
           <button onClick={handlePrevMonth} className="text-lg px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm">
@@ -83,7 +91,7 @@ export default function BudgetCalendar() {
         <div className="text-center">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">CashPlan</h1>
           <div className="text-sm text-gray-800 dark:text-gray-300">{monthName} {currentYear}</div>
-          <button onClick={handleResetToday} className="mt-1 text-sm px-3 py-1 bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 rounded shadow-sm">
+          <button onClick={handleResetToday} className="mt-1 text-sm px-3 py-1 rounded bg-white/30 dark:bg-white/10 hover:bg-white/40 dark:hover:bg-white/20 shadow-sm">
             Today
           </button>
         </div>
