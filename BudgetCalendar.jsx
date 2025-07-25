@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-jaimport SnakeGame from "./SnakeGame";
+import SnakeGame from "./SnakeGame";
 
 export default function BudgetCalendar() {
   const today = new Date();
@@ -117,6 +117,7 @@ export default function BudgetCalendar() {
           {/* Category Filter */}
           <div className="flex justify-center mb-4">
             <select
+              data-testid="category-filter"
               value={filterCat}
               onChange={(e) => setFilterCat(e.target.value)}
               className="p-2 rounded border bg-white/70 backdrop-blur"
@@ -137,14 +138,11 @@ export default function BudgetCalendar() {
 
           {/* Calendar grid */}
           <div className="grid grid-cols-7 gap-2">
-            {[...Array(offset)].map((_, i) => <div key={"e-" + i}></div>)}
+            {[...Array(offset)].map((_, i) => <div key={`empty-${i}`}></div>)}
             {days.map((day) => {
               const key = `${currentYear}-${currentMonth}-${day}`;
               const daily = entries[key] || [];
-              // Apply category filter
-              const filtered = filterCat === 'All'
-                ? daily
-                : daily.filter(e => e.category === filterCat);
+              const filtered = filterCat === 'All' ? daily : daily.filter(e => e.category === filterCat);
               const total = filtered.reduce((acc, e) => acc + (e.type === "income" ? e.amount : -e.amount), 0);
               const isFriday = new Date(currentYear, currentMonth, day).getDay() === 5;
 
@@ -156,8 +154,9 @@ export default function BudgetCalendar() {
                   title="Click to add entry"
                 >
                   <div className="font-semibold text-black">{day}</div>
-                  {filtered.map((e, i) => (
-                    <div key={i} className={`text-xs flex justify-between items-center ${e.type === "income" ? "text-green-600" : "text-red-500"}`}>
+                  {filtered.map((e, idx) => (
+                    <div key={idx} className={`text-xs flex justify-between items-center ${e.type === "income" ? "text-green-600" : "text-red-500"}`}
+                         data-testid="entry-item">
                       <span>{e.type === "income" ? "+" : "-"}{e.amount.toFixed(2)} £</span>
                       <span className="italic text-[10px]">{e.category}</span>
                     </div>
@@ -208,6 +207,7 @@ export default function BudgetCalendar() {
                 />
                 {/* Category selector */}
                 <select
+                  data-testid="category-selector"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full p-2 mb-3 rounded border bg-white text-black"
