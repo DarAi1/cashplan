@@ -98,7 +98,7 @@ export default function BudgetCalendar() {
           <div className="flex justify-between items-center mb-4 backdrop-blur-md bg-white/30 px-3 py-2 rounded-xl">
             <button onClick={handlePrevMonth} className="text-xl">←</button>
             <div className="text-center">
-              <h1 className="text-2xl font-bold">CashPlan v1.1 – Category Filter</h1>
+              <h1 className="text-2xl font-bold">CashPlan</h1>
               <p className="text-md">{monthName} {currentYear}</p>
             </div>
             <button onClick={handleNextMonth} className="text-xl">→</button>
